@@ -1,0 +1,41 @@
+#include <Adafruit_NeoPixel.h>
+
+#define LED_PIN    9       // Data pin connected to the NeoPixel strip
+#define NUM_LEDS   32      // Number of LEDs on the strip
+
+Adafruit_NeoPixel strip(NUM_LEDS, LED_PIN, NEO_GRB + NEO_KHZ800);
+
+int lightSensorPin = A0;    // Analog pin for the light sensor
+int potentiometerPin = A1; // Analog pin for the potentiometer
+
+void setup() {
+ strip.begin();           // Initialize NeoPixel strip
+ strip.show();            // Turn off all LEDs
+ Serial.begin(9600);      // Start serial communication
+}
+
+void loop() {
+ int lightValue = analogRead(lightSensorPin); // Read light sensor value
+ int potValue = analogRead(potentiometerPin); // Read potentiometer value
+
+ // Map light sensor value (0-1023) to brightness (0-255)
+ int brightnessFromLightSensor = map(lightValue, 0, 1023, 0, 255);
+
+ // Map potentiometer value (0-1023) to brightness (0-255)
+ int brightnessFromPotentiometer = map(potValue, 0, 1023, 0, 255);
+
+ // Use the lower value between light sensor and potentiometer for brightness
+ int brightness = min(brightnessFromLightSensor, brightnessFromPotentiometer);
+
+ // Set brightness
+ strip.setBrightness(brightness);
+ strip.show(); // Update the strip
+
+ // Optional: Print values for debugging
+ Serial.print("Light Sensor: ");
+ Serial.print(lightValue);
+ Serial.print(" | Potentiometer: ");
+ Serial.println(potValue);
+
+ delay(1000); // Wait for a second
+}
