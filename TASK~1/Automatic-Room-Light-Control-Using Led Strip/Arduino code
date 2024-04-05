@@ -1,0 +1,52 @@
+#include <Adafruit_NeoPixel.h>
+
+#define LED_PIN   9        // Define the pin connected to the NeoPixels
+#define NUM_LEDS  32       // Define the number of NeoPixels in the strip
+
+Adafruit_NeoPixel strip(NUM_LEDS, LED_PIN, NEO_GRB + NEO_KHZ800); // Create NeoPixel object
+
+int lightSensorPin = A1;   // Analog pin for the light sensor
+int potentiometerPin = A0; // Analog pin for the potentiometer
+
+void setup() {
+  strip.begin(); // Initialize the NeoPixel strip
+  strip.show();  // Show the initial state (all LEDs off)
+  Serial.begin(9600); // Initialize serial communication
+}
+
+void loop() {
+  // Read analog value from light sensor
+  int lightValue = analogRead(lightSensorPin);
+  
+  // Map the light sensor value (0-1023) to NeoPixel brightness (0-255)
+  int brightnessFromLightSensor = map(lightValue, 0, 1023, 255, 0);
+  
+  // Read analog value from potentiometer
+  int potValue = analogRead(potentiometerPin);
+  
+  // Map the potentiometer value (0-1023) to NeoPixel brightness (0-255)
+  int brightnessFromPotentiometer = map(potValue, 0, 1023, 0, 255);
+  
+  // Determine the minimum brightness from light sensor and potentiometer
+  int brightness = min(brightnessFromLightSensor, brightnessFromPotentiometer);
+  
+  // Set the brightness of the NeoPixel strip
+  strip.setBrightness(brightness);
+  
+  // Define RGB colors for cycling
+  uint32_t colors[] = {strip.Color(255, 0, 0),   // Red
+                       strip.Color(0, 255, 0),   // Green
+                       strip.Color(0, 0, 255)}; // Blue
+  int numColors = sizeof(colors) / sizeof(colors[0]); // Calculate the number of colors
+  
+  // Cycle through the colors
+  static int colorIndex = 0; // Static variable to keep track of color index
+  for(int i = 0; i < NUM_LEDS; i++) {
+    strip.setPixelColor(i, colors[colorIndex]); // Set each pixel to the current color
+  }
+  strip.show(); // Update the NeoPixel strip with the new colors
+  
+  colorIndex = (colorIndex + 1) % numColors; // Increment color index for next iteration
+  
+  delay(1000); // Delay for 1 second to control color change speed
+}
